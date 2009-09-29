@@ -1,0 +1,17 @@
+bin/sup
+History.txt
+Manifest.txt
+PostInstall.txt
+README.rdoc
+Rakefile
+lib/config/utsup.sample
+lib/hooks/post-commit
+lib/hooks/post-checkout
+lib/hooks/post-merge
+lib/hooks/post-receive
+lib/sup.rb
+script/console
+script/destroy
+script/generate
+test/test_helper.rb
+test/test_sup.rb
