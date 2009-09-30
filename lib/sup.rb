@@ -6,7 +6,7 @@ require 'yaml'
 require 'git'
 
 module Sup
-  VERSION = '0.0.1'
+  VERSION = '0.0.4'
   GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
   
   GLOBAL_CONFIG_PATH = '~/.utsup'
@@ -37,16 +37,15 @@ by Nick Merwin (Lemur Heavy Industries)
   init <project name>       # initilize current directory
 
   "<message>"               # send status update for current project
-
+  nm                        # destroy your last supdate
+  
   (no command)              # get all user's current status
+  all                       # get all user's statuses over the past day
 
   in "<message>"            # check in to project
   out "<message>"           # check out of project
   
-  nm                        # destroy your last supdate
-  
   users                     # get list of users in company
-  
   <user name>               # get last day's worth of status updates from specified user
 eos
   
@@ -187,8 +186,13 @@ eos
     # Get Statuses
     # ===========================
     
-    def get_statuses(name=nil)
-      statuses = Api::Status.find :all, :params => {:name => name}
+    def get_statuses(opts={})
+      name = opts[:name]
+      
+      statuses = Api::Status.find :all, :params => {
+        :name => name, 
+        :today => opts[:today]
+      }
       
       puts "----------------------------------------------------------------------------------"
       puts "This is UtSup#{" with #{name}" if name}:\n"
@@ -258,6 +262,9 @@ eos
         
         when "help":
           puts HELP_TEXT
+          
+        when "version":
+          puts VERSION
 
         when "init":
           Sup::init args.first
@@ -285,9 +292,17 @@ eos
         when "users":
           Sup::get_users
           
+        when "all":
+          # TODO: show all today
+          Sup::get_statuses :today => true
+          
+        when "search":
+          # TODO: search
+          
         when  /.+/:
           if Api::User.check_name(command)
-            return Sup::get_statuses(command)
+            Sup::get_statuses :name => command, :today => true
+            return 
           end
           
           # implicit text update: sup "chillin" 
