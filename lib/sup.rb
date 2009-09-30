@@ -6,7 +6,7 @@ require 'yaml'
 require 'git'
 
 module Sup
-  VERSION = '0.0.4'
+  VERSION = '0.0.5'
   GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
   
   GLOBAL_CONFIG_PATH = '~/.utsup'
@@ -47,6 +47,8 @@ by Nick Merwin (Lemur Heavy Industries)
   
   users                     # get list of users in company
   <user name>               # get last day's worth of status updates from specified user
+  
+  push                      # triggers a git push + update
 eos
   
   class << self
@@ -148,9 +150,13 @@ eos
           :message => git.branch.name
         
       when "push":
-        Api::Status.add :status_type => "StatusPush",
-          :message => git.branch.name
-          
+        resp = `git push #{args[1..-1]*' '} 2>&1`
+        puts resp
+        unless resp =~ /Everything up-to-date/
+          Api::Status.add :status_type => "StatusPush",
+            :message => git.branch.name 
+        end
+        
       when "receive":
         Api::Status.add :status_type => "StatusReceive",
           :message => git.branch.name
@@ -225,6 +231,11 @@ eos
   
     class Status < Base
       def self.add(attributes)
+        unless self.project_id
+          puts "You're not in a project."
+          return
+        end
+        
         create attributes.merge({:project_id => @@project_id})
       end
     end
@@ -277,8 +288,11 @@ eos
           Sup::check_out args.last
           puts "Checked out."
 
+        # --- Git -----------------
         when "git":
           Sup::git_update args
+        when "push":
+          Sup::git_update "push"
           
         when "nm":
           Sup::undo
