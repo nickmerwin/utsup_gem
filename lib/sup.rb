@@ -10,7 +10,7 @@ module Sup
   GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
   
   GLOBAL_CONFIG_PATH = '~/.utsup'
-  PROJECT_CONFIG_PATH = 'config/utsup.yml'
+  PROJECT_CONFIG_PATH = '.utsup'
   
   HELP_TEXT = <<-eos
 =======================================
@@ -19,8 +19,9 @@ by Nick Merwin (Lemur Heavy Industries)
 =======================================
 
 === Examples:
+  sup setup
 
-  sup init this_project_name
+  sup init
   sup in "whatup"
   sup
   sup "just chillin"
@@ -30,6 +31,8 @@ by Nick Merwin (Lemur Heavy Industries)
 
   help                      # show this message
   version                   # show version
+  
+  setup                     # initializes global config file
 
   init <project name>       # initilize current directory
 
@@ -37,25 +40,44 @@ by Nick Merwin (Lemur Heavy Industries)
 
   (no command)              # get all user's current status
 
-  in                        # check in to project
-  out                       # check out of project
+  in "<message>"            # check in to project
+  out "<message>"           # check out of project
   
   nm                        # destroy your last supdate
+  
+  users                     # get list of users in company
+  
+  <user name>               # get last day's worth of status updates from specified user
 eos
   
   class << self
+    
+    def setup
+      # --- global init
+      global_config_path = File.expand_path(GLOBAL_CONFIG_PATH)
+      
+      unless File.exists?(global_config_path)
+        require 'ftools'
+        File.copy File.join(File.dirname(__FILE__), 'config/utsup.sample'), global_config_path
+        puts "Initialized ~/.utsup, go change your api_key value."
+      else
+        puts "You're good to go."
+      end
+    end
     
     # ===========================
     # Init
     # ===========================
     
-    def init(args)
-      project = Api::Project.create :title => args.first
+    def init(project_title)
       
-      # --- save project id to config file
+      # --- project init
+      project = Api::Project.create :title => (project_title || File.basename(Dir.pwd))
+      
       project_config_path = File.join(Dir.pwd, PROJECT_CONFIG_PATH)
       
       unless File.exists?(project_config_path)
+        # TODO: what if id needs to be changed?
         File.open(project_config_path,'w'){|f| f.puts "project_id: #{project.id}"}
       end
       
@@ -74,25 +96,15 @@ eos
 
     def configure
       global_config_path = File.expand_path(GLOBAL_CONFIG_PATH)
-      
-      unless File.exists?(global_config_path)
-        require 'ftools'
-        File.copy File.join(File.dirname(__FILE__), 'config/utsup.sample'), global_config_path
-        puts "Initialized ~/.utsup, go change your api_key value!"
-      end
-      
       global_config = YAML.load_file(global_config_path)
       
-      # --- configure API
-      Api::Base.password = global_config['api_key']
-      Api::Base.site = "http://#{global_config['domain'] || 'utsup.com'}"
-      
-      # --- configure project
       project_config_path = File.join(Dir.pwd, PROJECT_CONFIG_PATH)
-      if File.exists?(project_config_path)
-        project_config = YAML.load_file(project_config_path)
-        Api::Base.project_id = project_config['project_id']
-      end
+      project_config = YAML.load_file(project_config_path) rescue {}
+      
+      # --- configure API
+      Api::Base.project_id = project_config['project_id']
+      Api::Base.password = project_config['api_key'] || global_config['api_key']
+      Api::Base.site = "http://#{project_config['domain'] || global_config['domain'] || 'utsup.com'}"
       
     end
     
@@ -185,6 +197,15 @@ eos
       end
       puts "----------------------------------------------------------------------------------"
     end
+    
+    def get_users
+      users = Api::User.find :all
+      
+      puts "#{users.first.company.title} Users:"
+      users.each do |user|
+        puts user.to_command_line
+      end
+    end
 
   end
   
@@ -205,7 +226,7 @@ eos
     end
   
     class Project < Base
-    
+      
     end
     
     class User < Base
@@ -220,14 +241,18 @@ eos
   end
   
   # ==============================
-  # Command
+  # Command Line Controller
   # ==============================
   
   module Command
     class << self
       def run(command, args)
         
-        Sup::configure
+        if command == "setup"
+          return Sup::setup
+        end
+        
+        Sup::configure 
         
         case command
         
@@ -235,7 +260,7 @@ eos
           puts HELP_TEXT
 
         when "init":
-          Sup::init args
+          Sup::init args.first
           puts "Supified!"
 
         when "in":
@@ -249,13 +274,16 @@ eos
           Sup::git_update args
           
         when "nm":
-          # destroy last text update
           Sup::undo
           puts "Undid last Supdate."
           
-        when "remove"
+        when "remove":
           File.unlink File.join(Dir.pwd, PROJECT_CONFIG_PATH)
+          # TODO: remove git hooks
           puts "De-Supified."
+
+        when "users":
+          Sup::get_users
           
         when  /.+/:
           if Api::User.check_name(command)
