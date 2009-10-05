@@ -6,11 +6,11 @@ require 'yaml'
 require 'git'
 
 module Sup
-  VERSION = '0.0.5'
+  VERSION = '0.0.8'
   GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
   
   GLOBAL_CONFIG_PATH = '~/.utsup'
-  PROJECT_CONFIG_PATH = '.utsup'
+  PROJECT_CONFIG_PATH = '.git/utsup.yml'
   
   HELP_TEXT = <<-eos
 =======================================
@@ -73,14 +73,14 @@ eos
     def init(project_title)
       
       # --- project init
-      project = Api::Project.create :title => (project_title || File.basename(Dir.pwd))
+      project_title = File.basename(Dir.pwd) if project_title.blank? || project_title == "."
+      project = Api::Project.create :title => project_title
       
       project_config_path = File.join(Dir.pwd, PROJECT_CONFIG_PATH)
       
-      unless File.exists?(project_config_path)
-        # TODO: what if id needs to be changed?
-        File.open(project_config_path,'w'){|f| f.puts "project_id: #{project.id}"}
-      end
+      project_config = YAML.load_file(project_config_path) rescue {}
+      project_config["project_id"] = project.id
+      File.open(project_config_path,'w'){|f| YAML.dump( project_config, f )}
       
       # --- write git hooks
       GIT_HOOKS.each do |hook|
@@ -132,9 +132,13 @@ eos
     # Git Update 
     # ===========================
   
+    def current_branch_name
+      `git branch 2> /dev/null | grep -e ^*`[/^\* (.*?)\n/,1]
+    end
+  
     def git_update(*args)
       git = Git.open(Dir.pwd)
-      
+
       args.flatten!
       
       case args.first.strip
@@ -147,23 +151,20 @@ eos
         # TODO: get previous branch name from ref
         
         Api::Status.add :status_type => "StatusCheckout",
-          :message => git.branch.name
+          :message => current_branch_name
         
       when "push":
         resp = `git push #{args[1..-1]*' '} 2>&1`
         puts resp
         unless resp =~ /Everything up-to-date/
-          Api::Status.add :status_type => "StatusPush",
-            :message => git.branch.name 
+          Api::Status.add :status_type => "StatusPush", :message => "pushed"
         end
         
       when "receive":
-        Api::Status.add :status_type => "StatusReceive",
-          :message => git.branch.name
+        Api::Status.add :status_type => "StatusReceive",:message => "received"
       
       when "merge":
-        Api::Status.add :status_type => "StatusMerge",
-          :message => git.branch.name
+        Api::Status.add :status_type => "StatusMerge", :message => "merged"
       
       when "commit":
         
@@ -173,7 +174,7 @@ eos
         Api::Status.add :status_type => "StatusCommit", 
           :message => commit.message, 
           :ref => sha, :text => commit.diff_parent
-        
+                  
       else
         puts "WTF git status is that?"
       end
@@ -203,7 +204,7 @@ eos
       puts "----------------------------------------------------------------------------------"
       puts "This is UtSup#{" with #{name}" if name}:\n"
       statuses.each do |status|
-        puts "=> #{status.to_command_line}"
+        puts "=> #{status.to_command_line.escape}"
       end
       puts "----------------------------------------------------------------------------------"
     end
@@ -236,7 +237,10 @@ eos
           return
         end
         
-        create attributes.merge({:project_id => @@project_id})
+        create attributes.merge({:project_id => @@project_id, :branch => Sup::current_branch_name})
+        
+      rescue ActiveResource::ResourceNotFound
+        puts "Your project_id was invalid, check #{PROJECT_CONFIG_PATH}"
       end
     end
   
@@ -263,7 +267,9 @@ eos
     class << self
       def run(command, args)
         
-        if command == "setup"
+        # no configure
+        case command
+        when "setup":
           return Sup::setup
         end
         
@@ -276,8 +282,8 @@ eos
           
         when "version":
           puts VERSION
-
-        when "init":
+          
+        when "init": 
           Sup::init args.first
           puts "Supified!"
 
@@ -335,3 +341,8 @@ eos
 end
 
 
+class String
+  def escape
+    eval '"'+ gsub(/\"/,'\"') + '"'
+  end
+end
