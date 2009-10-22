@@ -6,7 +6,7 @@ require 'yaml'
 require 'git'
 
 module Sup
-  VERSION = '0.0.8'
+  VERSION = '0.0.9'
   GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
   
   GLOBAL_CONFIG_PATH = '~/.utsup'
@@ -87,6 +87,7 @@ eos
         File.open(File.join(Dir.pwd, '.git/hooks/', hook), 'w', 0775) do |f|
           f.write(File.read(File.join(File.dirname(__FILE__),'hooks',hook)))
         end
+        #TODO: make sure files are executable if already existed
       end
       
     end
@@ -173,7 +174,7 @@ eos
       
         Api::Status.add :status_type => "StatusCommit", 
           :message => commit.message, 
-          :ref => sha, :text => commit.diff_parent
+          :ref => sha, :text => `git diff HEAD~ HEAD`
                   
       else
         puts "WTF git status is that?"
@@ -266,6 +267,7 @@ eos
   module Command
     class << self
       def run(command, args)
+        bench = Time.now
         
         # no configure
         case command
@@ -313,13 +315,14 @@ eos
           Sup::get_users
           
         when "all":
-          # TODO: show all today
           Sup::get_statuses :today => true
           
         when "search":
           # TODO: search
           
         when  /.+/:
+          
+          # TODO: combine user_name check and supdate into one ActiveResource call -- do name-check & return or supdate on server
           if Api::User.check_name(command)
             Sup::get_statuses :name => command, :today => true
             return 
@@ -334,6 +337,8 @@ eos
           Sup::get_statuses
         end
         
+        # TODO: config file option to set verbosity
+        puts "UtSup? v.#{VERSION} (#{Time.now - bench}s)"
       end
     end
   end
