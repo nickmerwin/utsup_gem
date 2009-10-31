@@ -13,7 +13,7 @@ lib/sup.rb
 lib/sup/differ/differ_control.rb
 lib/sup/differ/differ_run.rb
 lib/sup/differ/differ.rb
-lib/sup/yamler.rb
+lib/sup/yamlize.rb
 lib/sup/command.rb
 lib/sup/help.rb
 lib/sup/api.rb

@@ -1,6 +1,6 @@
 =begin
 ======
-Yamler
+Yamlize
 ======
 
 by Nick Merwin 10.31.09
@@ -9,7 +9,7 @@ Why? Bored with writing yaml loaders + dumpers.
 =end
 
 require 'yaml'
-class Yamler
+class Yamlize
   attr_reader :path, :attributes
   
   def initialize(path, type=Hash, &block)
@@ -54,6 +54,6 @@ end
 
 class Object
   def yamlize(path, &block)
-    Yamler.new path, self.class, &block
+    Yamlize.new path, self.class, &block
   end
 end

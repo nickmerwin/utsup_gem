@@ -7,7 +7,7 @@ require 'rubygems'
 require 'active_resource'
 require 'git'
 
-require 'sup/yamler'
+require 'sup/yamlize'
 
 require 'sup/differ/differ'
 require 'sup/api'
@@ -45,7 +45,7 @@ module Sup
         FileUtils.mkdir File.dirname(global_config_path)
         FileUtils.copy File.join(File.dirname(__FILE__), 'config/utsup.sample'), global_config_path
         
-        Yamler.new global_config_path  do |global_config|
+        Yamlize.new global_config_path  do |global_config|
           global_config.api_key = api_key
         end
         
@@ -67,12 +67,12 @@ module Sup
       project = Api::Project.create :title => project_title
       
       # add project id to .git
-      Yamler.new File.join(Dir.pwd, PROJECT_CONFIG_PATH) do |project_config|
+      Yamlize.new File.join(Dir.pwd, PROJECT_CONFIG_PATH) do |project_config|
         project_config.project_id = project.id
       end
       
       # add project path and id to global project config (for differ)
-      Yamler.new GLOBAL_PROJECT_CONFIG_PATH, Array do |global_project_config|
+      Yamlize.new GLOBAL_PROJECT_CONFIG_PATH, Array do |global_project_config|
         global_project_config << {'path'=>Dir.pwd, 'id'=>project.id}
         global_project_config.uniq!
       end
@@ -103,9 +103,9 @@ module Sup
 
     def configure
       
-      global_config = Yamler.new GLOBAL_CONFIG_PATH
-      project_config = Yamler.new(File.join(Dir.pwd, PROJECT_CONFIG_PATH)) rescue {}
-      global_project_config = Yamler.new GLOBAL_PROJECT_CONFIG_PATH
+      global_config = Yamlize.new GLOBAL_CONFIG_PATH
+      project_config = Yamlize.new(File.join(Dir.pwd, PROJECT_CONFIG_PATH)) rescue {}
+      global_project_config = Yamlize.new GLOBAL_PROJECT_CONFIG_PATH
       
       unless global_config['api_key']
         puts "You need to run 'sup setup <api_key>' first, thanks!"
