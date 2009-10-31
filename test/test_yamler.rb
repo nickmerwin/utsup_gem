@@ -71,9 +71,14 @@ class TestYamler < Test::Unit::TestCase
     a << 1
     a.save
     
+    # test some array functions
     b = [].yamlize @test_path
     assert_equal 1, b.first
     assert_equal [2], b.map{|i| i+1}
+    
+    b << 1
+    b.uniq!
+    assert_equal [1], b.attributes
   end
   
   def test_yamlize_hash

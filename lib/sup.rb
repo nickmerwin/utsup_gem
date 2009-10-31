@@ -74,6 +74,7 @@ module Sup
       # add project path and id to global project config (for differ)
       Yamler.new GLOBAL_PROJECT_CONFIG_PATH, Array do |global_project_config|
         global_project_config << {'path'=>Dir.pwd, 'id'=>project.id}
+        global_project_config.uniq!
       end
       
       # --- write git hooks
