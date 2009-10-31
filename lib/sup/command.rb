@@ -26,6 +26,7 @@ module Sup
           
         when "init": 
           Sup::init args.first
+          Differ::restart! # to reload projects.yml
           puts "Supified!"
 
         when "in":

@@ -20,6 +20,10 @@ module Sup
       def stop!
         `ruby #{File.join(File.expand_path(File.dirname(__FILE__)),'differ_control.rb')} stop`
       end
+      
+      def restart!
+        stop! && start!
+      end
     end
   end
   
