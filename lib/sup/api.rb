@@ -30,6 +30,17 @@ module Sup
     end
     
     class User < Base
+      def self.get_api_key(email,password)
+        project_config = Yamlize.new(File.join(Dir.pwd, PROJECT_CONFIG_PATH)) rescue {}
+        Base.site = "http://#{project_config['domain'] || "utsup.com"}"
+        
+        begin
+          post(:get_api_key, :email => email, :password => password).body
+        rescue ActiveResource::ResourceNotFound
+          false
+        end
+      end
+      
       def self.check_name(name)
         begin
           get :check_name, :name => name

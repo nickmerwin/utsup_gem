@@ -1,4 +1,5 @@
 # TODO: testing suite
+# TODO: proxy option
 
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
@@ -21,13 +22,35 @@ module Sup
   GLOBAL_PROJECT_CONFIG_PATH  = '~/.utsup/projects.yml'
   PROJECT_CONFIG_PATH         = '.git/utsup.yml'
   
+  URL = "http://utsup.com"
+  
   class << self
     
     # ===========================
     # Setup
     # ===========================
     
-    def setup(api_key="your api key here")
+    def sign_in
+      puts "Enter your UtSup.com credentials. Don't have an account yet? Create one at #{URL}"
+      
+      loop do
+        print "Email: "
+        email = gets.chomp
+        print "Password: "
+        system "stty -echo"
+        password = gets.chomp
+        system "stty echo"
+        puts ""
+        
+        if api_key = Api::User.get_api_key(email, password)
+          return api_key
+        else
+          puts "Couldn't find that email/password combo..."
+        end
+      end
+    end
+    
+    def setup(api_key=nil)
       require 'fileutils'
       
       # --- global init
@@ -41,16 +64,13 @@ module Sup
         FileUtils.mv oldpath+'.bak', global_config_path
       end
       
-      unless File.exists?(global_config_path)
-        FileUtils.mkdir File.dirname(global_config_path)
-        FileUtils.copy File.join(File.dirname(__FILE__), 'config/utsup.sample'), global_config_path
-        
-        Yamlize.new global_config_path  do |global_config|
-          global_config.api_key = api_key
-        end
-        
-        puts "Initialized ~/.utsup/config.yml"
-        
+      FileUtils.mkdir File.dirname(global_config_path) rescue nil
+      global_config = Yamlize.new global_config_path
+      
+      unless global_config['api_key']
+        global_config.api_key = api_key || sign_in
+        global_config.save
+        puts "Added API Key to #{GLOBAL_CONFIG_PATH}"
       else
         puts "You're good to go."
       end

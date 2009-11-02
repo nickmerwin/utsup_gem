@@ -1,3 +1,5 @@
+#TODO: check git status for added un-tracked files
+
 module Sup
   module Differ
     INTERVAL = 5

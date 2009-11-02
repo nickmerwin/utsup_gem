@@ -19,7 +19,7 @@ module Sup
     help                      # show this message
     version                   # show version
 
-    setup <api_key>           # initializes global config file
+    setup <api_key>           # initializes global config file, if no api_key specified, will let you login
 
     init <project name>       # initilize current directory
 

@@ -6,7 +6,7 @@ Be sure to sign up for an account at http://utsup.com
 
 Then, to begin using, first run:
 
-  sup setup <your-api-key>
+  sup setup
 
 Thanks for using UtSup!
   - Lemur Heavy Industries (http://lemurheavy.com)

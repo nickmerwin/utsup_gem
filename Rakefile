@@ -18,7 +18,6 @@ $hoe = Hoe.spec 'utsup' do
   # self.spec_extras[:extensions] = "extconf.rb"
   self.spec_extras[:rdoc_options] = ""
   self.spec_extras[:homepage] = %q{http://github.com/yickster/utsup_gem}
-  
 end
 
 require 'newgem/tasks'
