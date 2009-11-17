@@ -1,5 +1,5 @@
 module Sup
-  VERSION = '0.1.3'
+  VERSION = '0.1.4'
   GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
   
   GLOBAL_CONFIG_PATH          = '~/.utsup/config.yml'
@@ -111,12 +111,13 @@ module Sup
     # ===========================
 
     def configure
+      begin
+        global_config = Yamlize.new GLOBAL_CONFIG_PATH
+        project_config = Yamlize.new(File.join(Dir.pwd, PROJECT_CONFIG_PATH)) rescue {}
+        global_project_config = Yamlize.new GLOBAL_PROJECT_CONFIG_PATH
       
-      global_config = Yamlize.new GLOBAL_CONFIG_PATH
-      project_config = Yamlize.new(File.join(Dir.pwd, PROJECT_CONFIG_PATH)) rescue {}
-      global_project_config = Yamlize.new GLOBAL_PROJECT_CONFIG_PATH
-      
-      unless global_config['api_key']
+        raise unless global_config['api_key']
+      rescue 
         setup
         exit 0
       end
