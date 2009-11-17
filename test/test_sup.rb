@@ -5,7 +5,7 @@ class TestSup < Test::Unit::TestCase
   def setup
   end
   
-  def test_truth
-    assert true
+  def test_commands
+    
   end
 end

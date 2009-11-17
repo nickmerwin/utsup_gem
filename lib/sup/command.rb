@@ -27,12 +27,12 @@ module Sup
         when "init": 
           Sup::init args.first
           Differ::restart! # to reload projects.yml
-          puts "Supified!"
+          render "Supified!".in_green
 
         when "in":
           Sup::check_in args.last
           Differ::start!
-          puts "Checked in."
+          render "Sup'd in.".in_green
           
         when "out":
           Sup::check_out args.last
@@ -47,7 +47,7 @@ module Sup
           
         when "nm":
           Sup::undo
-          puts "Undid last Supdate."
+          render "Undid last Supdate.".in_red
           
         when "remove":
           File.unlink File.join(Dir.pwd, PROJECT_CONFIG_PATH)
@@ -75,22 +75,21 @@ module Sup
           # TODO: combine user_name check and supdate into one ActiveResource call -- do name-check & return or supdate on server
           if Api::User.check_name(command)
             Sup::get_statuses :name => command, :today => true
-            return 
+          else
+            # implicit text update: sup "chillin" 
+            render "Supdated!".in_green if Sup::update(command)
           end
-          
-          # implicit text update: sup "chillin" 
-          Sup::update command
-          puts "Supdated."
-
         else
           # full status check
           Sup::get_statuses
         end
         
         # TODO: config file option to set verbosity
-        puts "UtSup? v.#{VERSION} (#{Time.now - bench}s)"
+        render "UtSup?".in_magenta +
+          " v.#{VERSION}".in_green+
+          " (#{Time.now - bench}s)".in_white
 
-      rescue SocketError
+      rescue SocketError, Errno::ECONNREFUSED
         Sup::socket_error
       end
     end

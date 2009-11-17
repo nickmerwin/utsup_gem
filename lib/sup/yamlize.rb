@@ -52,8 +52,12 @@ class Yamlize
   end
 end
 
-class Object
+module YamlizeMethods
   def yamlize(path, &block)
     Yamlize.new path, self.class, &block
   end
+end
+
+class Object
+  include YamlizeMethods
 end

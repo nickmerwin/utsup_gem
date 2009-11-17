@@ -16,6 +16,7 @@ lib/sup/differ/differ.rb
 lib/sup/yamlize.rb
 lib/sup/command.rb
 lib/sup/help.rb
+lib/sup/base.rb
 lib/sup/api.rb
 script/console
 script/destroy

@@ -8,6 +8,10 @@ Then, to begin using, first run:
 
   sup setup
 
+You can view command reference here:
+
+  sup help
+
 Thanks for using UtSup!
   - Lemur Heavy Industries (http://lemurheavy.com)
  

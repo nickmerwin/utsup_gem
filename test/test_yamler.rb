@@ -1,10 +1,10 @@
 require File.dirname(__FILE__) + '/test_helper.rb'
 
-class TestYamler < Test::Unit::TestCase
+class TestYamlize < Test::Unit::TestCase
 
   def setup
-    @test_path = File.join(File.dirname(__FILE__),"yamler_test.yml")
-    @test_path2 = File.join(File.dirname(__FILE__),"yamler_test2.yml")
+    @test_path = File.join(File.dirname(__FILE__),"yamlize_test.yml")
+    @test_path2 = File.join(File.dirname(__FILE__),"yamlize_test2.yml")
   end
   
   def teardown
@@ -13,12 +13,12 @@ class TestYamler < Test::Unit::TestCase
   end
   
   def test_init
-    Yamler.new @test_path
+    Yamlize.new @test_path
     assert File.exists?(@test_path)
   end
   
   def test_setter
-    @obj = Yamler.new @test_path
+    @obj = Yamlize.new @test_path
     @obj.name = "nick merwin"
     @obj.title = "programmer"
     
@@ -36,29 +36,29 @@ class TestYamler < Test::Unit::TestCase
   end
   
   def test_save
-    @obj = Yamler.new @test_path
+    @obj = Yamlize.new @test_path
     @obj.name = "nick merwin"
     
     @obj.save
     
-    @obj2 = Yamler.new @test_path
+    @obj2 = Yamlize.new @test_path
     assert_equal  "nick merwin", @obj2.name
   end
   
   def test_block
-    Yamler.new @test_path do |obj|
+    Yamlize.new @test_path do |obj|
       obj.name = "nick merwin"
     end
     
-    @obj = Yamler.new @test_path
+    @obj = Yamlize.new @test_path
     assert_equal  "nick merwin", @obj.name
   end
   
   def test_type
-    @obj = Yamler.new @test_path
+    @obj = Yamlize.new @test_path
     assert_equal Hash, @obj.attributes.class
     
-    @obj2 = Yamler.new @test_path2, Array
+    @obj2 = Yamlize.new @test_path2, Array
     assert_equal Array, @obj2.attributes.class
     
     @obj2 << 1

@@ -2,7 +2,7 @@
 
 module Sup
   module Differ
-    INTERVAL = 5
+    INTERVAL = 300
     # TODO: pull interval out of config.yml?
     
     class << self
