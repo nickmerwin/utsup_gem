@@ -117,7 +117,7 @@ module Sup
       global_project_config = Yamlize.new GLOBAL_PROJECT_CONFIG_PATH
       
       unless global_config['api_key']
-        render "You need to run 'sup setup <api_key>' first, thanks!".in_red
+        setup
         exit 0
       end
       
