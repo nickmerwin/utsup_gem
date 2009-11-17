@@ -14,7 +14,7 @@ $hoe = Hoe.spec 'utsup' do
   self.developer 'Nick Merwin', 'nick@lemurheavy.com'
   self.post_install_message = File.read('PostInstall.txt')
   self.rubyforge_name       = self.name
-  self.extra_deps         = [['schacon-git'],['daemons'],['terminal_markup']]
+  self.extra_deps         = [['git'],['daemons'],['terminal_markup']]
   # self.spec_extras[:extensions] = "extconf.rb"
   self.spec_extras[:rdoc_options] = ""
   self.spec_extras[:homepage] = %q{http://github.com/yickster/utsup_gem}
