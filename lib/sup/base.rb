@@ -1,6 +1,5 @@
 module Sup
-  VERSION = '0.1.4'
-  GIT_HOOKS = %w(post-commit post-receive post-merge post-checkout) #TODO: post-rebase?
+  VERSION = '0.1.5'
   
   GLOBAL_CONFIG_PATH          = '~/.utsup/config.yml'
   GLOBAL_PROJECT_CONFIG_PATH  = '~/.utsup/projects.yml'
@@ -69,6 +68,13 @@ module Sup
     # Init
     # ===========================
     
+    GIT_HOOKS = {
+      "post-checkout" => "sup git checkout $@",
+      "post-commit"   => "sup git commit",
+      "post-merge"    => "sup git merge $@",
+      "post-receive"  => "sup git receive $@"
+    }
+    
     def init(project_title)
       
       # --- project init
@@ -87,20 +93,14 @@ module Sup
       end
       
       # --- write git hooks
-      #TODO: option to manually add hooks if they already have some...
-      GIT_HOOKS.each do |hook|
+      GIT_HOOKS.each do |hook, command|
         path = File.join(Dir.pwd, '.git/hooks/', hook)
-        hook_cmd = File.read(File.join(File.dirname(__FILE__),'hooks',hook))
+        exists = File.exists?(path)
         
-        if File.exists?(path)
-          puts "You already have a git hook here: #{path}"
-          puts "Please make sure it's executable add this to it:"
-          puts hook_cmd + "\n"
-          next
-        end
+        next if exists && File.read(path) =~ /#{Regexp.quote(command)}/
         
-        File.open(path, 'w', 0775) do |f|
-          f.write hook_cmd
+        File.open(path, (exists ? 'a' : 'w'), 0775) do |f|
+          f.puts command
         end
       end
       

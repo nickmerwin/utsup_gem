@@ -41,7 +41,7 @@ class Yamlize
     end
     
     if @attributes.respond_to?(name)
-      return @attributes.send name, *args, &block
+      return @attributes.send(name, *args, &block)
     end
     
     super name, *args

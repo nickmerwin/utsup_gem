@@ -5,10 +5,6 @@ PostInstall.txt
 README.rdoc
 Rakefile
 lib/config/utsup.sample
-lib/hooks/post-commit
-lib/hooks/post-checkout
-lib/hooks/post-merge
-lib/hooks/post-receive
 lib/sup.rb
 lib/sup/differ/differ_control.rb
 lib/sup/differ/differ_run.rb

@@ -11,7 +11,7 @@ module Sup
         # no configure
         case command
         when "setup":
-          return Sup::setup args.last
+          return Sup::setup(args.last)
         end
         
         Sup::configure 
