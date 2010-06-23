@@ -22,6 +22,8 @@ module Sup
         render "Your project_id was invalid, check #{PROJECT_CONFIG_PATH}".in_red
       rescue SocketError
         Sup::socket_error
+      rescue Exception => exc
+        render exc.message.in_red
       end
     end
   
