@@ -75,35 +75,39 @@ module Sup
       "post-receive"  => "sup git receive $@"
     }
     
-    def init(project_title)
-      
+    def init(project_title)      
       # --- project init
       project_title = File.basename(Dir.pwd) if project_title.blank? || project_title == "."
       project = Api::Project.create :title => project_title
       
-      # add project id to .git
-      Yamlize.new File.join(Dir.pwd, PROJECT_CONFIG_PATH) do |project_config|
-        project_config.project_id = project.id
-      end
-      
-      # add project path and id to global project config (for differ)
-      Yamlize.new GLOBAL_PROJECT_CONFIG_PATH, Array do |global_project_config|
-        global_project_config << {'path'=>Dir.pwd, 'id'=>project.id}
-        global_project_config.uniq!
-      end
-      
-      # --- write git hooks
-      GIT_HOOKS.each do |hook, command|
-        path = File.join(Dir.pwd, '.git/hooks/', hook)
-        exists = File.exists?(path)
-        
-        next if exists && File.read(path) =~ /#{Regexp.quote(command)}/
-        
-        File.open(path, (exists ? 'a' : 'w'), 0775) do |f|
-          f.puts command
+      if project.valid?
+        # add project id to .git
+        Yamlize.new File.join(Dir.pwd, PROJECT_CONFIG_PATH) do |project_config|
+          project_config.project_id = project.id
         end
+
+        # add project path and id to global project config (for differ)
+        Yamlize.new GLOBAL_PROJECT_CONFIG_PATH, Array do |global_project_config|
+          global_project_config << {'path'=>Dir.pwd, 'id'=>project.id}
+          global_project_config.uniq!
+        end
+
+        # --- write git hooks
+        GIT_HOOKS.each do |hook, command|
+          path = File.join(Dir.pwd, '.git/hooks/', hook)
+          exists = File.exists?(path)
+
+          next if exists && File.read(path) =~ /#{Regexp.quote(command)}/
+
+          File.open(path, (exists ? 'a' : 'w'), 0775) do |f|
+            f.puts command
+          end
+        end
+                
+      else
+        #// project creation faild
+        render project.errors.full_messages.map &:in_red
       end
-      
     end
 
     # ===========================
