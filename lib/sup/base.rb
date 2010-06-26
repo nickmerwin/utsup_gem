@@ -6,7 +6,7 @@ module Sup
   PROJECT_CONFIG_PATH         = '.git/utsup.yml'
   
   API_URL = "https://utsup.heroku.com"
-  SIGNUP_URL = "http://utsup.com"
+  SIGNUP_URL = "http://www.utsup.com"
   
   class << self
     
