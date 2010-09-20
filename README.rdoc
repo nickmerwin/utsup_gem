@@ -12,7 +12,9 @@ utsup.com client
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+
+do you use git to track project changes? need to know what members of your team are up to in real-time? hate having to ask for status updates?
+UTSUP? allows you to transparently track user interactions with a repository through the command line, via twitter, and on the UTSUP?
 
 == REQUIREMENTS:
 
