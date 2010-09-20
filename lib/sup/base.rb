@@ -166,7 +166,7 @@ module Sup
       
       case args.first.strip
                 
-      when "checkout":
+      when "checkout"
         previous_head = args[1]
         next_head = args[2]
         branch = args[3] == '1'
@@ -176,20 +176,20 @@ module Sup
         Api::Status.add :status_type => "StatusCheckout",
           :message => current_branch_name
         
-      when "push":
+      when "push"
         resp = `git push #{args[1..-1]*' '} 2>&1`
         puts resp
         unless resp =~ /Everything up-to-date/
           Api::Status.add :status_type => "StatusPush", :message => "pushed"
         end
         
-      when "receive":
+      when "receive"
         Api::Status.add :status_type => "StatusReceive",:message => "received"
       
-      when "merge":
+      when "merge"
         Api::Status.add :status_type => "StatusMerge", :message => "merged"
       
-      when "commit":
+      when "commit"
         
         commit = git.object('HEAD')
         sha = commit.sha
