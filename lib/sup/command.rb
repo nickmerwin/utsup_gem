@@ -10,7 +10,7 @@ module Sup
 
         # no configure
         case command
-        when "setup":
+        when "setup"
           return Sup::setup(args.last)
         end
         
@@ -18,49 +18,49 @@ module Sup
         
         case command
         
-        when "help":
+        when "help"
           puts HELP_TEXT
           
-        when "version":
+        when "version"
           puts VERSION
           
-        when "init": 
+        when "init"
           Sup::init args.first
           Differ::restart! # to reload projects.yml
           render "Supified!".in_green
 
-        when "in":
+        when "in"
           Sup::check_in args.last
           Differ::start!
           render "Sup'd in.".in_green
           
-        when "out":
+        when "out"
           Sup::check_out args.last
           Differ::stop!
           puts "Checked out."
 
         # --- Git -----------------
-        when "git":
+        when "git"
           Sup::git_update args
-        when "push":
+        when "push"
           Sup::git_update "push"
           
-        when "nm":
+        when "nm"
           Sup::undo
           render "Undid last Supdate.".in_red
           
-        when "remove":
+        when "remove"
           File.unlink File.join(Dir.pwd, PROJECT_CONFIG_PATH)
           # TODO: remove git hooks
           puts "De-Supified."
 
-        when "users":
+        when "users"
           Sup::get_users
           
-        when "all":
+        when "all"
           Sup::get_statuses :today => true
           
-        when "search":
+        when "search"
           # TODO: search
           
         when "start"
@@ -70,7 +70,7 @@ module Sup
           Differ::stop!
           puts "Stopped."
           
-        when  /.+/:
+        when  /.+/
           
           # TODO: combine user_name check and supdate into one ActiveResource call -- do name-check & return or supdate on server
           if Api::User.check_name(command)
